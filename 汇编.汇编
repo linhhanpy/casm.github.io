@@ -1,0 +1,103 @@
+全局 主函数
+声明 打印
+声明 输入
+声明 命令
+
+定义段
+Format 定义 "请输入用户名："，0
+aS 定义 "%s"，0
+byte_404012 定义 "请输入密码："，0
+Buffer 定义 "用户名和密码："，0
+Command 定义 "pause"，0
+string1 定义 "错误"，0
+string2 定义 "正确"，0
+Admin 定义 "admin"，0
+Password 定义 "123456"，0
+
+预留段
+username 预留字节 50
+password 预留字节 50
+
+代码段
+主函数：
+    进栈 rbp
+    赋值 rbp， 栈顶
+    减 栈顶， 190
+
+    ； 输出提示输入用户名
+    写入 rcx， 【Format】
+    调用 打印
+
+    ； 读取用户名
+    写入 rdx， 【username】
+    写入 rcx， 【aS】
+    调用 输入
+
+    ； 输出提示输入密码
+    写入 rcx， 【byte_404012】
+    调用 打印
+
+    ； 读取密码
+    写入 rdx， 【password】
+    写入 rcx， 【aS】
+    调用 输入
+
+    ； 比较用户名
+    写入 rsi， 【Admin】
+    写入 rdi， 【username】
+    调用 compare_strings
+    比较 rax， 1
+    非相等跳转 error
+
+    ； 比较密码
+    写入 rsi， 【Password】
+    写入 rdi， 【password】
+    调用 compare_strings
+    比较 rax， 1
+    非相等跳转 error
+
+    写入 rcx, 【string2】
+    调用 打印
+    直接跳转 end
+
+compare_strings：
+    进栈 rbp
+    赋值 rbp， 栈顶
+    减 栈顶， 16
+    xor rax， rax
+    xor rcx， rcx
+loop_compare：
+    赋值 dl， 【rsi + rcx】
+    赋值 al， 【rdi + rcx】
+    比较 dl， al
+    非相等跳转 not_l
+    比较 dl， 0
+    相等跳转 l
+    inc rcx
+    直接跳转 loop_compare
+
+not_l：
+    赋值 rax， 0
+    leave
+    返回
+
+l：
+    赋值 rax， 1
+    leave
+    返回
+
+end：
+    ； 暂停命令
+    写入 rcx， 【Command】
+    调用 命令
+
+    赋值 eax， 0
+    加 栈顶， 190
+    出栈 rbp
+    返回
+
+error：
+    写入 rcx， 【string1】
+    调用 打印
+    直接跳转 end
+
